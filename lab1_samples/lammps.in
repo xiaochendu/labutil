@@ -1,4 +1,3 @@
-
 # ---------- 1. Initialize simulation ---------------------
 units metal
 atom_style atomic
@@ -12,6 +11,7 @@ pair_coeff * * /home/gridsan/rafagb/3320_atomistic_shared/lammps/potentials/Ag_u
 
 # pair_style lj/cut 4.5
 # pair_coeff 1 1 0.392 2.620 4.5
+# last 3 arguments are: ϵ (energy units), σ (distance units), and LJ cutoff (distance units)
 
 # ---------- 3. Run single point calculation  ---------------------
 thermo_style custom step pe lx ly lz press pxx pyy pzz
@@ -24,5 +24,4 @@ variable length equal "lx"
 
 print "Total energy (eV) = ${totenergy}"
 print "Number of atoms = ${natoms}"
-print "Lattice constant (Angstoms) = ${length}"
-        
+print "Lattice constant (Angstoms) = ${length}"      

@@ -1,9 +1,9 @@
 import sys
-sys.path.append("/home/modeler/labutil/")
+sys.path.append("/Users/xiaochendu/Documents/GitHub/labutil/")
 from labutil.src.plugins.lammps import *
 from ase.spacegroup import crystal
 from ase.build import *
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -54,7 +54,7 @@ def compute_energy(alat, template):
     Make an input template and select potential and structure, and the path where to run
     """
     potpath = os.path.join(os.environ['LAMMPS_POTENTIALS'],'Ag_u3.eam')
-    potential = ClassicalPotential(path=potpath, ptype='eam', element=["Ag"])
+    potential = a(path=potpath, ptype='eam', element=["Ag"])
     runpath = Dir(path=os.path.join(os.environ['WORKDIR'], "Lab1", str(alat)))
     struc = make_struc(alat=alat)
     output_file = lammps_run(struc=struc, runpath=runpath, potential=potential, intemplate=template, inparam={})
@@ -63,7 +63,7 @@ def compute_energy(alat, template):
 
 
 def lattice_scan():
-    alat_list = numpy.linspace(3.8, 4.3, 7)
+    alat_list = np.linspace(3.8, 4.3, 7)
     energy_list = [compute_energy(alat=a, template=input_template)[0] for a in alat_list]
     print(energy_list)
     plt.plot(alat_list, energy_list)
