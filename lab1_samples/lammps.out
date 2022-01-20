@@ -1,28 +1,11 @@
 LAMMPS (7 Aug 2019)
-# ---------- 1. Initialize simulation ---------------------
-units metal
-atom_style atomic
-dimension  3
-boundary   p p p
-read_data lammps.data
+Reading data file ...
   orthogonal box = (0 0 0) to (3.9 3.9 3.9)
   1 by 1 by 1 MPI processor grid
   reading atoms ...
   4 atoms
   read_data CPU = 0.00019908 secs
-
-# ---------- 2. Specify interatomic potential ---------------------
-pair_style eam
-pair_coeff * * /home/pleon/mylammps/potentials/Ag_u3.eam
 Reading potential file /home/pleon/mylammps/potentials/Ag_u3.eam with DATE: 2007-06-11
-
-# pair_style lj/cut 4.5
-# pair_coeff 1 1 0.392 2.620 4.5
-# last 3 arguments are: ϵ (energy units), σ (distance units), and LJ cutoff (distance units)
-
-# ---------- 3. Run single point calculation  ---------------------
-thermo_style custom step pe lx ly lz press pxx pyy pzz
-run 0
 WARNING: No fixes defined, atoms won't move (../verlet.cpp:52)
 Neighbor list info ...
   update every 1 steps, delay 10 steps, check yes
@@ -36,6 +19,10 @@ Neighbor list info ...
       pair build: half/bin/atomonly/newton
       stencil: half/bin/3d/newton
       bin: standard
+Setting up Verlet run ...
+  Unit style    : metal
+  Current step  : 0
+  Time step     : 0.001
 Per MPI rank memory allocation (min/avg/max) = 2.959 | 2.959 | 2.959 Mbytes
 Step PotEng Lx Ly Lz Press Pxx Pyy Pzz 
        0   -10.883613          3.9          3.9          3.9    208470.58    208470.58    208470.58    208470.58 
@@ -64,16 +51,7 @@ Total # of neighbors = 268
 Ave neighs/atom = 67
 Neighbor list builds = 0
 Dangerous builds = 0
-
-# ---- 4. Define and print useful variables -------------
-variable natoms equal "count(all)"
-variable totenergy equal "pe"
-variable length equal "lx"
-
-print "Total energy (eV) = ${totenergy}"
 Total energy (eV) = -10.8836132844451
-print "Number of atoms = ${natoms}"
 Number of atoms = 4
-print "Lattice constant (Angstoms) = ${length}"
 Lattice constant (Angstoms) = 3.9
 Total wall time: 0:00:00

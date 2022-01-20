@@ -175,6 +175,3 @@ def ase2struc(ase_atoms):
 def struc2ase(struc):
     return Struc.to_ase(struc)
 
-
-#def wf(func):
-#    return func
