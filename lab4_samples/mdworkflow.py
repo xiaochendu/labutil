@@ -1,24 +1,48 @@
-from labutil.src.plugins.lammps import *
+# %%
+import os
+import sys
+from pathlib import Path
+sys.path.append("/home/dux/")
+
+# set env var
+os.environ["LAMMPS_COMMAND"] = "/home/pleon/mylammps/src/lmp_serial"
+os.environ["LAMMPS_POTENTIALS"] = "/home/pleon/mylammps/potentials/"
+os.environ['WORKDIR'] = "/home/dux/3_320/"
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from labutil.src.plugins.lammps import (lammps_run, parse_lammps_thermo, get_rdf, parse_lammps_rdf)
+from labutil.src.objects import (ClassicalPotential, Struc, ase2struc, Dir)
 from ase.spacegroup import crystal
-from ase.build import *
+from ase.build import make_supercell
 import matplotlib.pyplot as plt
 
+# %%
+def make_struc(size=1):
+    """Creates the crystal structure using ASE.
 
-def make_struc(size):
+    Parameters
+    ----------
+    alat : float
+        Lattice parameter in angstroms
+    size : int
+        Adjust size of unit cell
+
+    Returns
+    -------
+    obj
+        Structure object converted from ase
     """
-    Creates the crystal structure using ASE.
-    :param size: supercell multiplier
-    :return: structure object converted from ase
-    """
-    alat = 4.10
-    unitcell = crystal('Al', [(0, 0, 0)], spacegroup=225, cellpar=[alat, alat, alat, 90, 90, 90])
-    multiplier = numpy.identity(3) * size
+    alat = 4.090
+    unitcell = crystal('Ag', [(0, 0, 0)], spacegroup=225, cellpar=[alat, alat, alat, 90, 90, 90])
+    multiplier = np.identity(3) * size
     supercell = make_supercell(unitcell, multiplier)
     structure = Struc(ase2struc(supercell))
     return structure
 
 
-def compute_dynamics(size, timestep, nsteps, temperature):
+def compute_dynamics(size, timestep, nsteps, temperature, runpath=os.environ['WORKDIR']):
     """
     Make an input template and select potential and structure, and input parameters.
     Return a pair of output file and RDF file written to the runpath directory.
@@ -31,8 +55,8 @@ def compute_dynamics(size, timestep, nsteps, temperature):
     boundary   p p p
     read_data $DATAINPUT
 
-    pair_style eam/alloy
-    pair_coeff * * $POTENTIAL  Al
+    pair_style eam
+    pair_coeff * * $POTENTIAL
 
     velocity  all create $TEMPERATURE 87287 dist gaussian
 
@@ -53,9 +77,8 @@ def compute_dynamics(size, timestep, nsteps, temperature):
     timestep $TIMESTEP
     run $NSTEPS
     """
-
-    potential = ClassicalPotential(ptype='eam', element='Al', name='Al_zhou.eam.alloy')
-    runpath = Dir(path=os.path.join(os.environ['WORKDIR'], "Lab4/Problem1", "size_" + str(size)))
+    potpath = os.path.join(os.environ['LAMMPS_POTENTIALS'],'Ag_u3.eam')
+    potential = ClassicalPotential(path=potpath, ptype='eam', element=["Ag"])
     struc = make_struc(size=size)
     inparam = {
         'TEMPERATURE': temperature,
@@ -73,8 +96,11 @@ def compute_dynamics(size, timestep, nsteps, temperature):
     return output, rdfs
 
 
-def md_run():
-    output, rdfs = compute_dynamics(size=3, timestep=0.001, nsteps=1000, temperature=300)
+def md_run(timestep=0.001):
+    size = 3
+    temp = 300
+    runpath = Dir(path=os.path.join(os.environ['WORKDIR'], "Lab4/p1", "size_" + str(size)))
+    output, rdfs = compute_dynamics(size=size, timestep=0.001, nsteps=1000, temperature=temp, runpath=runpath)
     [simtime, pe, ke, energy, temp, press, dens, msd] = output
     ## ------- plot output properties
     #plt.plot(simtime, temp)
@@ -85,9 +111,10 @@ def md_run():
     # ----- plot radial distribution functions
     for rdf in rdfs:
         plt.plot(rdf[0], rdf[1])
+    plt.savefig(os.path.join(runpath.path, "rdf"))
     plt.show()
 
-
+# %%
 if __name__ == '__main__':
     # put here the function that you actually want to run
     md_run()

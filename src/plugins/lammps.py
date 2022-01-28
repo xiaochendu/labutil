@@ -65,15 +65,18 @@ def get_rdf(runpath):
 
 
 def get_lammps_energy(outfile):
-    energy = None
-    lattice = None
     with open(outfile.path, 'r') as fout:
         for line in fout.readlines():
             if 'Total energy' in line:
-                energy = float(line.split(" = ")[1])
+                totenergy = float(line.split(" = ")[1])
+            if  'Number of atoms' in line:
+                natoms = float(line.split(" = ")[1])
+            if 'Cohesive energy' in line:
+                ecoh = float(line.split(" = ")[1])
             if 'Lattice constant (Angstoms)' in line:
                 lattice = float(line.split(" = ")[1])
-    return energy, lattice
+
+    return totenergy, natoms, ecoh, lattice
 
 
 def parse_lammps_thermo(outfile):
@@ -93,7 +96,7 @@ def parse_lammps_thermo(outfile):
             if read_temp:
                 values = line.split()
                 output.append(values)
-    outrows = numpy.transpose(numpy.array(output))
+    outrows = numpy.transpose(numpy.array(output, dtype='float32'))
     return outrows
 
 
@@ -113,7 +116,7 @@ def parse_lammps_rdf(rdffile):
             else:
                 buffer.append([values[1], values[2]])
                 if len(buffer) == int(nbins):
-                    frame = numpy.transpose(numpy.array(buffer))
+                    frame = numpy.transpose(numpy.array(buffer, dtype='float32'))
                     rdfs.append(frame)
                     buffer = []
     return rdfs
